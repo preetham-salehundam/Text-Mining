@@ -6,40 +6,35 @@ from multiprocessing import Pool
 import matplotlib.pyplot as plt
 from util import argmax
 
-#constants
+# constants
 CHI = "chi2"
 MI = "mutual info"
 color_schema = {MULTINOMIAL_NB: "red", BERNOULLI_NB: "green", KNN: "blue", SUPPORT_VEC: "yellow"}
 
-# def diff(l1, l2):
-#     i = 0
-#     l1_diff = []
-#     l2_diff = []
-#     while i < len(l1) and i < len(l2):
-#         if l1[i] != l2[i]:
-#             l1_diff.append(l1[i])
-#             l2_diff.append(l2[i])
-#         i = i + 1
-#
-#     if i < len(l1):
-#         l1_diff.extend(l1[i:])
-#     if i < len(l2):
-#         l2_diff.extend(l2[i:])
-#
-#     return l1_diff, l2_diff
 
 def fit_transform(selection_instance, X, y, K):
+    """
+    fit_transform for feature selection
+    :param selection_instance: CHI or MI
+    :param X: selected features
+    :param y: targets of selected features
+    :param K: no of selected features
+    :return:
+    """
     return selection_instance(X, y), K
 
 
 def compute(classifier_instance, metric):
+    """
+    compute metrics
+    :param classifier_instance: Multinomial NB, Bernouli NB, K-Nearest Neighbor, Support vec instance
+    :param metric: f1_macro, precision_macro, recall_macro
+    :return: metric
+    """
     instance = classifier_instance.eval()
     K = instance.features.shape[-1]
     return instance.compute_metric(metric), K
 
-
-def __plot__():
-    pass
 
 def plot_k_vs_f1(X, y, k=(100, 20000), selection_method=CHI):
     log_file = None
@@ -55,18 +50,16 @@ def plot_k_vs_f1(X, y, k=(100, 20000), selection_method=CHI):
     # accumulate selected feature sets
     feature_selection_results = pool.starmap(fit_transform, params)
     # pass the newly selected feature X_new and y to the classifier
-
     for classifier in [MULTINOMIAL_NB, BERNOULLI_NB, KNN, SUPPORT_VEC]:
         print("processing ", classifier)
         classifier_instances = [Classification(X_new, y).get_classifier(classifier=classifier) for X_new, K in
                                     feature_selection_results]
-        # needs classifier instance and metric to be computed
+
         eval_params = [(instance, F1_MACRO) for instance in classifier_instances]
+        # needs classifier instance and metric to be computed
         evaluation_results = pool.starmap(compute, eval_params)
 
-    # for result in results:
-    #     print(result.shape)
-
+        # for reporting purposes
         k_s = []
         mean = []
         p_std, n_std = [], []
@@ -100,50 +93,29 @@ def plot_k_vs_f1(X, y, k=(100, 20000), selection_method=CHI):
         plt.xlabel("K - values")
         plt.ylabel("Mean F1 scores")
         plt.legend(loc='upper right')
-    # for scores, K in evaluation_results:
-    #     print(K, scores[0], scores[1], "*")
+        plt.title("No. of features vs F1 scores for "+selection_method)
 
     return plt
 
 
 if __name__ == "__main__":
+    """
+    USAGE: python feature_selection.py
+    
+    the default training file names are selected and would fail if those files are not found
+    Dependencies: training_data_file.TF, training_data_file.IDF, training_data_file.TFIDF
+    """
 
     feature_tf, targets = load_svmlight_file("training_data_file.TF")
     feature_idf, targets = load_svmlight_file("training_data_file.IDF")
     feature_tf_idf, targets = load_svmlight_file("training_data_file.TFIDF")
 
+    # plot chi square selected feature set vs f1 scores
+    plt = plot_k_vs_f1(feature_tf_idf, targets, selection_method=CHI, k=(100, 20000))
+    plt.show()
+
+    # plot mutual information selected feature set vs f1 scores
     plt = plot_k_vs_f1(feature_tf_idf, targets, selection_method=MI, k=(100, 20000))
     plt.show()
 
-    plt = plot_k_vs_f1(feature_tf_idf, targets, selection_method=CHI, k=(100, 20000))
-    plt.show()
-    #plt.savefig("K_vs_F1.png", format="png")
-    #plt = plot_k_vs_f1(feature_tf_idf, targets, selection_method=MI, k=(100, 20000))
-
-    # clf = Classification()
-    # pool = Pool(processes=4)
-
-    # X_new1 = pool.starmap(SelectKBest(chi2, k=100).fit_transform, [(feature_tf, targets),  (feature_idf, targets),
-    #                                                       (feature_tf_idf, targets)])
-    # X_new2 = pool.starmap(SelectKBest(mutual_info_classif, k=100).fit_transform, [(feature_tf, targets),  (feature_idf, targets),
-    #                                                       (feature_tf_idf, targets)])
-    # # print(X_new1)
-    # # print("---------")
-    # # print(X_new2)
-    # feature_type = ["TF", "IDF", "TFIDF"]
-    # for classifier in [MULTINOMIAL_NB, BERNOULLI_NB, KNN, SUPPORT_VEC]:
-    #     i = 0
-    #     for feature_1, feature_2 in zip(X_new1, X_new2):
-    #         print("=============" * 5)
-    #         print("Classifier - {},  feature - {} , Metrics:".format(classifier, feature_type[i]))
-    #         print("=============" * 5)
-    #         print("Using Chi square test")
-    #         print("=============" * 5)
-    #         clf.get_classifier(classifier).eval(feature_1, targets).report_metrics()
-    #         print("=============" * 5)
-    #         print("Using Mutual Information")
-    #         print("=============" * 5)
-    #         clf.get_classifier(classifier).eval(feature_2, targets).report_metrics()
-    #         i = i + 1
-    #         print("\n\n")
 

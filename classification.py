@@ -14,13 +14,22 @@ F1_MACRO = "f1_macro"
 PRECISION_MACRO = "precision_macro"
 RECALL_MACRO = "recall_macro"
 
-class Classification():
+
+class Classification:
     def __init__(self, X, y, classifier = MultinomialNB()):
         self.clf = classifier
         self.features = X
         self.targets = y
+        self.f1_macro = 0
+        self.precision_macro = 0
+        self.recall_macro = 0
 
     def get_classifier(self, classifier):
+        """
+        classifier factory
+        :param classifier: MULTINOMIAL_NB or BERNOULLI_NB or KNN or SVC
+        :return: self
+        """
         if classifier == MULTINOMIAL_NB:
             self.clf = MultinomialNB()
         elif classifier == BERNOULLI_NB:
@@ -31,7 +40,7 @@ class Classification():
             self.clf = SVC(class_weight="balanced")
         return self
 
-    def eval(self, features = None, targets = None):
+    def eval(self, features=None, targets=None):
         if features is not None:
             self.features = features
         if targets is not None:
@@ -46,6 +55,11 @@ class Classification():
             print("{}: {:0.2f} (+/- {:0.2f})".format(metric, *self.compute_metric(metric)))
 
     def compute_metric(self, metric=F1_MACRO):
+        """
+        computes specified metric
+        :param metric: f1_macro, precision_macro, recall_macro
+        :return: return mean and std
+        """
         if metric == F1_MACRO:
             return self.f1_macro.mean(), self.f1_macro.std() * 2
         elif metric == PRECISION_MACRO:
@@ -55,9 +69,16 @@ class Classification():
 
 
 if __name__ == "__main__":
+    """
+    REPORT CLASSIFICATION PERFORMANCE METRICS
+    USAGE: python classfication.py
+    Dependencies: training_data_file.TF, training_data_file.IDF, training_data_file.TFIDF
+    """
+    # load training data
     features_tf, targets = load_svmlight_file("training_data_file.TF")
     features_idf, targets = load_svmlight_file("training_data_file.IDF")
     features_tf_idf, targets = load_svmlight_file("training_data_file.TFIDF")
+
     for name in ["MultinomialNB", "BernoulliNB", "KNeighborsClassifier", "SVC"]:
         if name == "MultinomialNB":
             clf = MultinomialNB()
@@ -67,6 +88,7 @@ if __name__ == "__main__":
             clf = KNeighborsClassifier(n_neighbors=6)
         else:
             clf = SVC(class_weight="balanced")
+
         print("=============" * 5)
         print("Feature - Term Frequency, Classifier - {}, Metrics:".format(name))
         print("=============" * 5)
@@ -80,50 +102,3 @@ if __name__ == "__main__":
         print("Feature - TFIDF, Classifier - {}, Metrics:".format(name))
         print("=============" * 5)
         classification.eval(features_tf_idf, targets=targets).report_metrics()
-
-
-
-
-
-
-
-
-    # clf = MultinomialNB()
-    # scores = cross_val_score(clf, features_tf, targets, cv=5, scoring='f1_macro')
-    # print("MultinomialNB - TF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_idf, targets, cv=5, scoring='f1_macro')
-    # print("MultinomialNB - IDF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_tf_idf, targets, cv=5, scoring='f1_macro')
-    # print("MultinomialNB - TFIDF Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    #
-    # print("=========="*5)
-    # #TODO: check if we can use parameters while constructing
-    # clf = BernoulliNB()
-    # scores = cross_val_score(clf, features_tf, targets, cv=5, scoring='f1_macro')
-    # print("BernoulliNB - TF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_idf, targets, cv=5, scoring='f1_macro')
-    # print("BernoulliNB - IDF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_tf_idf, targets, cv=5, scoring='f1_macro')
-    # print("BernoulliNB - TFIDF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    #
-    # print("==========" * 5)
-    #
-    # clf = KNeighborsClassifier()
-    # scores = cross_val_score(clf, features_tf, targets, cv=5, scoring='f1_macro')
-    # print("KNeighborsClassifier - TF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_idf, targets, cv=5, scoring='f1_macro')
-    # print("KNeighborsClassifier - IDF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_tf_idf, targets, cv=5, scoring='f1_macro')
-    # print("KNeighborsClassifier - TFIDF -  Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    #
-    # print("==========" * 5)
-    #
-    # clf = SVC()
-    # scores = cross_val_score(clf, features_tf, targets, cv=5, scoring='f1_macro')
-    # print("SVC - TF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_idf, targets, cv=5, scoring='f1_macro')
-    # print("SVC - IDF - Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(clf, features_tf_idf, targets, cv=5, scoring='f1_macro')
-    # print("SVC - TFIDF- Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    #
-    # print("done")

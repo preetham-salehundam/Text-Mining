@@ -7,30 +7,14 @@ import matplotlib as mpl
 mpl.use("TkAgg")
 import matplotlib.pyplot as plt
 
-#
-# class Cluster:
-#     def __init__(self, algorithm):
-#         self.__algo__ = algorithm
-#         self.__results__ = None
-#         self.__labels__ = None
-#
-#     def fit(self, features):
-#         self.__results__ = self.__algo__.fit(features)
-#         self.__labels__ = self.__results__.labels_
-#         return self
-#
-#     def get_labels(self):
-#         return self.__labels__
-#
-#     def get_results(self):
-#         return self.__results__
 
-SILHOUETTE = "Sihouette Coefficient"
+SILHOUETTE = "Silhouette Coefficient"
 NMI = "Normalized Mutual Index"
 
 
 def fit(model, X):
     return model.fit(X)
+
 
 def plot_k_vs_metrics(K, X, k_means_labels, hierarchical_labels, metric=SILHOUETTE):
     """
@@ -51,16 +35,19 @@ def plot_k_vs_metrics(K, X, k_means_labels, hierarchical_labels, metric=SILHOUET
             k_means_nmi[k] = silhouette_score(X, k_means_labels[i], metric="euclidean")
             hierarchical_cluster_nmi[k] = silhouette_score(X, hierarchical_labels[i], metric="euclidean")
     if metric == SILHOUETTE:
+        # plot the n-clusters vs silhouette scores for analysis
         plt.plot(list(K), list(k_means_sc.values()))
         plt.plot(list(K), list(hierarchical_cluster_sc.values()))
         plt.show()
     elif metric == NMI:
+        # plot the n-clusters vs NMI scores for analysis
         plt.plot(list(K), list(k_means_nmi.values()))
         plt.plot(list(K), list(hierarchical_cluster_nmi.values()))
         plt.show()
 
 
 if __name__ == "__main__":
+
     # read the training data
     TRAINING_FILE = "training_data_file.TFIDF"
     # read the sparse matrix from training file
@@ -74,20 +61,21 @@ if __name__ == "__main__":
     # chi squared method has yielded better F1 score for 5200 features in the previous experiment
     X_new = SelectKBest(chi2, k=K_BEST).fit_transform(features, target)
 
-    #
     params = [(KMeans(n_clusters=K), X_new) for K in range(2, 26)]
 
+    # k means cluster models
     K_means_cluster_results = pool.starmap(fit, params)
 
     params = [(AgglomerativeClustering(n_clusters=K, linkage="ward"), X_new.toarray()) for K in range(2, 26)]
 
+    # agglomerative cluster models
     hierarchical_cluster_results = pool.starmap(fit, params)
 
-    print(len(K_means_cluster_results), len(hierarchical_cluster_results))
-
+    # cluster labels
     k_means_labels = [ km.labels_ for km in K_means_cluster_results ]
     hierarchical_labels = [hc.labels_ for hc in hierarchical_cluster_results]
 
+    # plots
     plot_k_vs_metrics(K=range(2, 26), X=X_new, k_means_labels=k_means_labels, hierarchical_labels=hierarchical_labels,
                       metric=SILHOUETTE)
 
