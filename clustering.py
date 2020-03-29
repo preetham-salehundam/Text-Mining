@@ -32,8 +32,16 @@ NMI = "Normalized Mutual Index"
 def fit(model, X):
     return model.fit(X)
 
-
 def plot_k_vs_metrics(K, X, k_means_labels, hierarchical_labels, metric=SILHOUETTE):
+    """
+    plots no.of cluster vs silhouette score/ normalized mutual index
+    :param K:  number of clusters
+    :param X: Selected features using either CHI or MI
+    :param k_means_labels: cluster labels of the data after k means clustering 
+    :param hierarchical_labels: cluster labels of the data after hierarchical clustering 
+    :param metric: Whether Sihouette Coefficient or Normalized Mutual Index
+    :return: None
+    """
     k_means_sc, hierarchical_cluster_sc, k_means_nmi, hierarchical_cluster_nmi = {},{},{},{}
     for i, k in enumerate(K):
         if metric == SILHOUETTE:
@@ -55,14 +63,18 @@ def plot_k_vs_metrics(K, X, k_means_labels, hierarchical_labels, metric=SILHOUET
 if __name__ == "__main__":
     # read the training data
     TRAINING_FILE = "training_data_file.TFIDF"
+    # read the sparse matrix from training file
     features, target = load_svmlight_file(TRAINING_FILE)
+    # fork 4 processes for multiprocessing
     pool = Pool(processes=4)
 
     # choosing the best K value using CHI-square from previous experiments.
     K_BEST = 5200
 
+    # chi squared method has yielded better F1 score for 5200 features in the previous experiment
     X_new = SelectKBest(chi2, k=K_BEST).fit_transform(features, target)
 
+    #
     params = [(KMeans(n_clusters=K), X_new) for K in range(2, 26)]
 
     K_means_cluster_results = pool.starmap(fit, params)
@@ -78,6 +90,9 @@ if __name__ == "__main__":
 
     plot_k_vs_metrics(K=range(2, 26), X=X_new, k_means_labels=k_means_labels, hierarchical_labels=hierarchical_labels,
                       metric=SILHOUETTE)
+
+    plot_k_vs_metrics(K=range(2, 26), X=X_new, k_means_labels=k_means_labels, hierarchical_labels=hierarchical_labels,
+                      metric=NMI)
 
 
 

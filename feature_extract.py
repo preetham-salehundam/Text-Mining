@@ -290,38 +290,38 @@ def get_program_args(sys):
     return sys.argv[1:]
 
 
-
-
 if __name__ == '__main__':
-    MINI_GROUPS_LOC, feature_def_file, class_def_file, training_data_file  = get_program_args(sys)
+    """
+    Usage: python feature_extract.py directory_of_newsgroups_data feature_definition_file class_definition_file training_data_file
+    """
+    MINI_GROUPS_LOC, feature_def_file, class_def_file, training_data_file = get_program_args(sys)
 
     indexed_docs = []
-    inverted_index  = InvertedIndex()
-    MINI_GROUPS_LOC = "/Users/preetham/PycharmProjects/Text-Mining/mini_newsgroups/"
+    inverted_index = InvertedIndex()
     for news_grp in os.listdir(MINI_GROUPS_LOC):
         news_grp_path = os.path.join(MINI_GROUPS_LOC, news_grp)
         if not news_grp.startswith("."):
             # to avoid files .DS_STORE and other files which are not related
             class_label = CLASS_MAPPINGS[news_grp]
+            # parsing and indexing the docs
             for _file in tqdm(os.listdir(news_grp_path), ascii=True, desc="Indexing news group {}".format(news_grp)):
                 doc_path = os.path.join(news_grp_path, _file)
                 doc = parse_document(doc_path, class_label)
                 terms = inverted_index.indexDoc(doc)
                 indexed_docs.append((doc, terms))
                 # print(doc)
-
-    # class_def_file = "class_definition_file"
-    # feature_def_file = "feature_definition_file"
+    # create training files
     training_tf_file = "{}.TF".format(training_data_file)
     training_idf_file = "{}.IDF".format(training_data_file)
     training_tf_idf_file = "{}.TFIDF".format(training_data_file)
-    # write the class_definition_file
 
+    # write the class_definition_file
     with open(class_def_file, "w") as fd:
         for label, grp in CLASS_MAPPINGS.items():
             fd.write("{}, {}\n".format(grp, label))
     print(class_def_file, " created successfully! ")
-    #write the fetaure_definition_file
+
+    # write the fetaure_definition_file
     with open(feature_def_file, "w") as fd:
         for item in inverted_index.items:
             fd.write("{}, {}\n".format(inverted_index.items[item].feature_id, item))
