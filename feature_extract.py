@@ -240,7 +240,7 @@ def parse_document(filename, _class):
     """
     with open(filename, "r", encoding="ascii", errors="ignore") as fd:
         # id is the filename
-        doc_id = filename.split("/")[-1]
+        doc_id = filename.split(os.sep)[-1]
         line_no = -1
         lines = fd.readlines()
         subject = ""
