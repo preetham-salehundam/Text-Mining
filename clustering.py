@@ -65,16 +65,19 @@ if __name__ == "__main__":
     pool = Pool(processes=4)
 
     # choosing the best K value using CHI-square from previous experiments.
-    K_BEST = 5200
+    K_BEST = 5500
 
+    print("selecting {} best features using CHI-Square selection")
     # chi squared method has yielded better F1 score for 5200 features in the previous experiment
     X_new = SelectKBest(chi2, k=K_BEST).fit_transform(features, target)
 
+    print("Performing K means clustering with no. of clusters varying from 2 to 25")
     params = [(KMeans(n_clusters=K), X_new) for K in range(2, 26)]
 
     # k means cluster models
     K_means_cluster_results = pool.starmap(fit, params)
 
+    print("Performing Agglomerative clustering with no. of clusters varying from 2 to 25")
     params = [(AgglomerativeClustering(n_clusters=K, linkage="ward"), X_new.toarray()) for K in range(2, 26)]
 
     # agglomerative cluster models
