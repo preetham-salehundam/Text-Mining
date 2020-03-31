@@ -3,6 +3,7 @@ from sklearn.datasets import load_svmlight_file
 from sklearn.feature_selection import SelectKBest, chi2
 from multiprocessing import Pool
 from sklearn.metrics import silhouette_score, normalized_mutual_info_score
+from numpy import float32
 import matplotlib as mpl
 mpl.use("TkAgg")
 import matplotlib.pyplot as plt
@@ -59,7 +60,7 @@ if __name__ == "__main__":
     # read the training data
     TRAINING_FILE = "training_data_file.TFIDF"
     # read the sparse matrix from training file
-    features, target = load_svmlight_file(TRAINING_FILE)
+    features, target = load_svmlight_file(TRAINING_FILE, dtype=float32)
     # fork 4 processes for multiprocessing
     pool = Pool(processes=4)
 
