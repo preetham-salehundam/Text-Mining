@@ -16,7 +16,7 @@ def fit(model, X):
     return model.fit(X)
 
 
-def plot_k_vs_metrics(K, X, k_means_labels, hierarchical_labels, metric=SILHOUETTE):
+def plot_k_vs_metrics(K, X, y, k_means_labels, hierarchical_labels, metric=SILHOUETTE):
     """
     plots no.of cluster vs silhouette score/ normalized mutual index
     :param K:  number of clusters
@@ -32,17 +32,25 @@ def plot_k_vs_metrics(K, X, k_means_labels, hierarchical_labels, metric=SILHOUET
             k_means_sc[k] = silhouette_score(X, k_means_labels[i], metric="euclidean")
             hierarchical_cluster_sc[k] = silhouette_score(X, hierarchical_labels[i], metric="euclidean")
         elif metric == NMI:
-            k_means_nmi[k] = silhouette_score(X, k_means_labels[i], metric="euclidean")
-            hierarchical_cluster_nmi[k] = silhouette_score(X, hierarchical_labels[i], metric="euclidean")
+            k_means_nmi[k] = normalized_mutual_info_score(labels_true=y, labels_pred=k_means_labels[i])
+            hierarchical_cluster_nmi[k] = normalized_mutual_info_score(labels_true=y, labels_pred=hierarchical_labels[i])
     if metric == SILHOUETTE:
         # plot the n-clusters vs silhouette scores for analysis
-        plt.plot(list(K), list(k_means_sc.values()))
-        plt.plot(list(K), list(hierarchical_cluster_sc.values()))
+        plt.plot(list(K), list(k_means_sc.values()), label="K means")
+        plt.plot(list(K), list(hierarchical_cluster_sc.values()), label="hierarchical clustering")
+        plt.xlabel("no. of clusters")
+        plt.ylabel("silhouette_score")
+        plt.legend(loc="best")
+        plt.title("n_clusters vs silhouette_score")
         plt.show()
     elif metric == NMI:
         # plot the n-clusters vs NMI scores for analysis
-        plt.plot(list(K), list(k_means_nmi.values()))
-        plt.plot(list(K), list(hierarchical_cluster_nmi.values()))
+        plt.plot(list(K), list(k_means_nmi.values()), label="K means")
+        plt.plot(list(K), list(hierarchical_cluster_nmi.values()), label="hierarchical clustering")
+        plt.xlabel("no. of clusters")
+        plt.ylabel("NMI")
+        plt.legend(loc="best")
+        plt.title("n_clusters vs NMI")
         plt.show()
 
 
@@ -76,10 +84,10 @@ if __name__ == "__main__":
     hierarchical_labels = [hc.labels_ for hc in hierarchical_cluster_results]
 
     # plots
-    plot_k_vs_metrics(K=range(2, 26), X=X_new, k_means_labels=k_means_labels, hierarchical_labels=hierarchical_labels,
+    plot_k_vs_metrics(K=range(2, 26), X=X_new, y=target,  k_means_labels=k_means_labels, hierarchical_labels=hierarchical_labels,
                       metric=SILHOUETTE)
 
-    plot_k_vs_metrics(K=range(2, 26), X=X_new, k_means_labels=k_means_labels, hierarchical_labels=hierarchical_labels,
+    plot_k_vs_metrics(K=range(2, 26), X=X_new, y=target, k_means_labels=k_means_labels, hierarchical_labels=hierarchical_labels,
                       metric=NMI)
 
 

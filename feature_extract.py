@@ -152,7 +152,6 @@ class InvertedIndex:
         self.nDocs += 1
         return terms
 
-    @staticmethod
     def custom_strip(self, token):
         return token.strip(__PUNCTUATIONS__ + " ")
 
@@ -284,7 +283,9 @@ if __name__ == '__main__':
     """
     MINI_GROUPS_LOC, feature_def_file, class_def_file, training_data_file = get_program_args(sys)
 
+    # index to establish relation between doc and term
     indexed_docs = []
+    # to establish relation between term and document
     inverted_index = InvertedIndex()
     for news_grp in os.listdir(MINI_GROUPS_LOC):
         news_grp_path = os.path.join(MINI_GROUPS_LOC, news_grp)
@@ -319,7 +320,6 @@ if __name__ == '__main__':
     idf_file = open(training_idf_file, "w")
     tf_idf_file = open(training_tf_idf_file, "w")
 
-    inverted_index.pre_compute_tf_idf()
     tf_features, idf_features, tf_idf_features = {}, {}, {}
     doc_feature_tf, doc_feature_idf, doc_feature_tf_idf = {}, {}, {}
 
@@ -329,12 +329,15 @@ if __name__ == '__main__':
             tf_features[fid] = inverted_index.items[term].posting[doc.docID].term_freq(type=__LOG_TF__)
             idf_features[fid] = inverted_index.idf(term)
             tf_idf_features[fid] = tf_features[fid] * idf_features[fid]
+        # svm lite file needs the feature ids to be sorted
         tf_features = sorted(tf_features.items(), key=lambda x: x[0])
         idf_features = sorted(idf_features.items(), key=lambda x: x[0])
         tf_idf_features = sorted(tf_idf_features.items(), key=lambda x: x[0])
+        # write the training data
         tf_file.write("{} {}\n".format(doc.class_label, stringify(tf_features)))
         idf_file.write("{} {}\n".format(doc.class_label, stringify(idf_features)))
         tf_idf_file.write("{} {}\n".format(doc.class_label, stringify(tf_idf_features)))
+        # reset the features
         tf_features, idf_features, tf_idf_features = {}, {}, {}
 
     tf_file.close()
