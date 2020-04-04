@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # choosing the best K value using CHI-square from previous experiments.
     K_BEST = 5500
 
-    print("selecting {} best features using CHI-Square selection")
+    print("selecting {} best features using CHI-Square selection".format(K_BEST))
     # chi squared method has yielded better F1 score for 5200 features in the previous experiment
     X_new = SelectKBest(chi2, k=K_BEST).fit_transform(features, target)
 
