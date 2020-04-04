@@ -7,6 +7,8 @@ from numpy import float32
 import matplotlib as mpl
 mpl.use("TkAgg")
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
 
 
 SILHOUETTE = "Silhouette Coefficient"

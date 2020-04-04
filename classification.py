@@ -3,6 +3,8 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.datasets import load_svmlight_file
 from sklearn.model_selection import cross_val_score
+import warnings
+warnings.filterwarnings("ignore")
 
 MULTINOMIAL_NB = "MultinomialNB"
 BERNOULLI_NB = "BernoulliNB"

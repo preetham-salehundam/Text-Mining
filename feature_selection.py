@@ -5,6 +5,8 @@ from classification import Classification, MULTINOMIAL_NB, BERNOULLI_NB, KNN, SU
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
 from util import argmax
+import warnings
+warnings.filterwarnings("ignore")
 
 # constants
 CHI = "chi2"
