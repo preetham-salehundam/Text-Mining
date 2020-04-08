@@ -2,7 +2,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2, mutual_info_classif
 from sklearn.datasets import load_svmlight_file
 from classification import Classification, MULTINOMIAL_NB, BERNOULLI_NB, KNN, SUPPORT_VEC, F1_MACRO
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 import matplotlib.pyplot as plt
 from util import argmax
 import warnings
@@ -12,6 +12,7 @@ warnings.filterwarnings("ignore")
 CHI = "chi2"
 MI = "mutual info"
 color_schema = {MULTINOMIAL_NB: "red", BERNOULLI_NB: "green", KNN: "blue", SUPPORT_VEC: "yellow"}
+N_PROCESSES = cpu_count()
 
 
 def fit_transform(selection_instance, X, y, K):
@@ -46,7 +47,7 @@ def plot_k_vs_f1(X, y, k=(100, 20000), selection_method=CHI):
     else:
         method = mutual_info_classif
         log_file = open("MI.values", "w")
-    pool = Pool(processes=4)
+    pool = Pool(processes=N_PROCESSES)
     # selecting K best features using CHI or MI ofr K's ranging from 100 to 20000
     params = [(SelectKBest(method, k=K).fit_transform, X, y , K) for K in range(k[0], k[1], 300)]
     # accumulate selected feature sets

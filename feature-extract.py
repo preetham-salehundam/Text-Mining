@@ -279,7 +279,7 @@ def get_program_args(sys):
 
 if __name__ == '__main__':
     """
-    Usage: python feature_extract.py directory_of_newsgroups_data feature_definition_file class_definition_file training_data_file
+    Usage: python feature-extract.py directory_of_newsgroups_data feature_definition_file class_definition_file training_data_file
     """
     MINI_GROUPS_LOC, feature_def_file, class_def_file, training_data_file = get_program_args(sys)
 

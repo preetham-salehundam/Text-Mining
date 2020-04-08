@@ -1,7 +1,7 @@
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.datasets import load_svmlight_file
 from sklearn.feature_selection import SelectKBest, chi2
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from sklearn.metrics import silhouette_score, normalized_mutual_info_score
 from numpy import float32
 import matplotlib as mpl
@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 
 SILHOUETTE = "Silhouette Coefficient"
 NMI = "Normalized Mutual Index"
-
+N_PROCESSES = cpu_count()
 
 def fit(model, X):
     return model.fit(X)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # read the sparse matrix from training file
     features, target = load_svmlight_file(TRAINING_FILE, dtype=float32)
     # fork 4 processes for multiprocessing
-    pool = Pool(processes=4)
+    pool = Pool(processes=N_PROCESSES)
 
     # choosing the best K value using CHI-square from previous experiments.
     K_BEST = 5500
